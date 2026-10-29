@@ -1,6 +1,8 @@
+> Locked baseline: EFT **1.2.5.0.48146**, SPT 5.0. Newer EFT work must use a separate branch and installation. The original `spt-5.0-48146` branch remains available as historical provenance.
+
 # Freecam â€” local SPT 5.0 / EFT 48146 port
 
-Branch `spt-5.0-48146` in [James's fork](https://github.com/jpeckham/SPT-Freecam/tree/spt-5.0-48146) ports acidphantasm's upstream commit `fa45a86d48aa6b9311f9a255b03a82a84be291ba`. No existing 5.0 port was found in the upstream branch/PR list or the other listed fork. Version **2.0.0** identifies this experimental port; it is not an upstream release.
+Branch `spt-5.0-eft-1.2.5.0.48146` in [James's fork](https://github.com/jpeckham/SPT-Freecam/tree/spt-5.0-eft-1.2.5.0.48146) ports acidphantasm's upstream commit `fa45a86d48aa6b9311f9a255b03a82a84be291ba`. No existing 5.0 port was found in the upstream branch/PR list or the other listed fork. Version **2.0.0** identifies this experimental port; it is not an upstream release.
 
 ## Build and install this branch
 
@@ -8,7 +10,7 @@ Requires .NET 10 SDK and a working SPT 5.0 / EFT 1.2.5.0.48146 installation with
 
 ```powershell
 dotnet build project/Terkoiz.Freecam/Terkoiz.Freecam.csproj -c Release `
-  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local'
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146'
 ```
 
 Close the client/server, back up any previous plugin/config, and copy the contents of `project/Terkoiz.Freecam/Build/BepInEx/plugins/Freecam` into the installation's `BepInEx/plugins/Freecam`. Include `LICENSE`; remove duplicate older Freecam DLLs elsewhere. Builds stage locally and do not automatically install. No game/reference assemblies are distributed. To uninstall, close the game and remove `Terkoiz.Freecam.dll` from that folder.
