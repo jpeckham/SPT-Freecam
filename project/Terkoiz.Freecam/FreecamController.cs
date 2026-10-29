@@ -123,6 +123,7 @@ namespace Terkoiz.Freecam
             {
                 // Tell the fall damage patch that we just teleported. Used for the "smart" fall damage prevention feature
                 FallDamagePatch.HasTeleported = true;
+                _freeCamScript.ReleaseCamera(); // restore the owned pose before reading the teleport target
 
                 // We grab the camera's position, but we subtract a bit off the Y axis, because the players coordinate origin is at the feet
                 var position = new Vector3(_mainCamera.transform.position.x, _mainCamera.transform.position.y - 1.8f, _mainCamera.transform.position.z);
@@ -167,6 +168,7 @@ namespace Terkoiz.Freecam
                 _mainCamera.transform.rotation = _lastRotation.Value;
             }
 
+            _freeCamScript.AcquireCamera();
             _freeCamScript.IsActive = true;
         }
 
@@ -176,6 +178,7 @@ namespace Terkoiz.Freecam
         /// <param name="localPlayer"></param>
         private void SetPlayerToFirstPersonMode(Player localPlayer)
         {
+            _freeCamScript.ReleaseCamera();
             _freeCamScript.IsActive = false;
             _controlsToggled = false;
 
@@ -244,6 +247,11 @@ namespace Terkoiz.Freecam
 
         public void OnDestroy()
         {
+            if (_freeCamScript != null)
+            {
+                _freeCamScript.ReleaseCamera();
+                _freeCamScript.IsActive = false;
+            }
             RestorePlayerCamera();
             if (_gamePlayerOwner != null) _gamePlayerOwner.enabled = true;
             if (_playerUi != null && _uiHidden) _playerUi.gameObject.SetActive(true);

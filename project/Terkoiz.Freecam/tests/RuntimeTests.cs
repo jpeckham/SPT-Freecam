@@ -13,6 +13,7 @@ public class RuntimeTests : BasePlugin
     public override void Load()
     {
         GameObject test = null;
+        GameObject parent = null;
         try
         {
             test = new GameObject("Freecam runtime test");
@@ -45,13 +46,45 @@ public class RuntimeTests : BasePlugin
             suspend.Invoke(controller, null);
             restore.Invoke(controller, null);
             if (nativeCamera.enabled) throw new Exception("Previously disabled camera unexpectedly enabled");
-            Log.LogInfo("PASS: native camera ownership suspend/restore, component creation, pre-raid guard, normal/free/paused reset gating");
+            var acquire = typeof(Freecam).GetMethod("AcquireCamera");
+            var release = typeof(Freecam).GetMethod("ReleaseCamera");
+            var late = typeof(Freecam).GetMethod("LateUpdate");
+            var render = typeof(Freecam).GetMethod("OnPreCull");
+            if (acquire == null || release == null || late == null || render == null)
+                throw new Exception("Missing independent free-camera pose ownership");
+            var expectedPosition = new Vector3(50, 20, 70);
+            var expectedRotation = Quaternion.Euler(12, 75, 0);
+            test.transform.SetPositionAndRotation(expectedPosition, expectedRotation);
+            acquire.Invoke(camera, null);
+            parent = new GameObject("Freecam moving parent test");
+            test.transform.SetParent(parent.transform, true);
+            // A native/manual camera writer can run even when its component is disabled.
+            for (var i = 0; i < 20; i++)
+            {
+                parent.transform.SetPositionAndRotation(new Vector3(i, i, i), Quaternion.Euler(0, i * 5, 0));
+                test.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+                camera.Update(); // paused controls must retain pose ownership
+                if (Vector3.Distance(test.transform.position, expectedPosition) > .001f)
+                    throw new Exception("External camera reset contaminated paused position");
+                test.transform.position = Vector3.one;
+                late.Invoke(camera, null);
+                test.transform.rotation = Quaternion.identity;
+                render.Invoke(camera, null);
+                if (Vector3.Distance(test.transform.position, expectedPosition) > .001f || Quaternion.Angle(test.transform.rotation, expectedRotation) > .01f)
+                    throw new Exception("External camera writes survived late/render pose restoration");
+            }
+            release.Invoke(camera, null);
+            test.transform.position = Vector3.zero;
+            late.Invoke(camera, null);
+            if (test.transform.position != Vector3.zero) throw new Exception("Released camera still overrides native position");
+            Log.LogInfo("PASS: independent world pose survives 20 native resets and parent moves; paused/late/render restore and release; native camera suspend/restore and reset gating");
         }
         catch (Exception ex) { Log.LogError("FAIL: " + ex); }
         finally
         {
             FreecamPlugin.FreecamControllerInstance = null;
             if (test != null) UnityEngine.Object.Destroy(test);
+            if (parent != null) UnityEngine.Object.Destroy(parent);
         }
     }
 }

@@ -1,4 +1,4 @@
-# Freecam — local SPT 5.0 / EFT 48146 port
+# Freecam â€” local SPT 5.0 / EFT 48146 port
 
 Branch `spt-5.0-48146` in [James's fork](https://github.com/jpeckham/SPT-Freecam/tree/spt-5.0-48146) ports acidphantasm's upstream commit `fa45a86d48aa6b9311f9a255b03a82a84be291ba`. No existing 5.0 port was found in the upstream branch/PR list or the other listed fork. Version **2.0.0** identifies this experimental port; it is not an upstream release.
 
@@ -16,6 +16,12 @@ Close the client/server, back up any previous plugin/config, and copy the conten
 The port uses BepInEx 6 IL2CPP `BasePlugin`, native component registration and constructors, the IL2CPP KeyboardShortcut type, and the SPTushonka patch namespace. It accesses the native player-body/health-controller properties directly instead of managed field reflection/injection. The fall prefix returns zero when suppressing the native float-returning method and targets only the local player. Additional fixes guard incomplete initialization, preserve detached-camera state when controls are paused, reset raid state, restore input/UI on component teardown, and use Euler yaw for teleport rotation instead of a quaternion component. Original license and author credit are retained.
 
 ## Controls and validation
+
+### 2.0.2: preserve independent camera pose
+
+The 2.0.1 in-raid retest still leashed, although movement traveled farther. Freecam now retains its own world position/rotation instead of accepting external camera-transform writes as the next movement origin. It restores that pose before input, in LateUpdate, and before culling, including while controls are paused. Exit, teleport, and teardown release ownership; teleport reads the restored position. Native controller suspension is retained. The specific remaining native writer is not yet identified.
+
+Release build: zero warnings/errors. Native-component regression passed 20 external resets and parent movements, paused/late/pre-cull restoration, release, and previous suspension guards. The regression failed on 2.0.1. Render callbacks were invoked explicitly by the harness; **the actual in-raid leash still needs retesting**. Version 2.0.2 is installed locally; the temporary test DLL was removed.
 
 ### 2.0.1: camera leash correction
 

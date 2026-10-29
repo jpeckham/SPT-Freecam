@@ -13,9 +13,37 @@ namespace Terkoiz.Freecam
     {
         public Freecam(System.IntPtr pointer) : base(pointer) { }
         public bool IsActive = false;
+        private bool _ownsCamera;
+        private Vector3 _position;
+        private Quaternion _rotation;
+
+        public void AcquireCamera()
+        {
+            if (_ownsCamera) return;
+            _position = transform.position;
+            _rotation = transform.rotation;
+            _ownsCamera = true;
+        }
+
+        public void ReleaseCamera()
+        {
+            RestorePose();
+            _ownsCamera = false;
+        }
+
+        private void RestorePose()
+        {
+            if (_ownsCamera) transform.SetPositionAndRotation(_position, _rotation);
+        }
+
+        public void LateUpdate() => RestorePose();
+        public void OnPreCull() => RestorePose();
 
         public void Update()
         {
+            // Native/manual camera writers and parent movement must never become
+            // the origin of the next free-camera movement. Pausing input still owns pose.
+            RestorePose();
             if (!IsActive)
             {
                 return;
@@ -67,9 +95,9 @@ namespace Terkoiz.Freecam
                 }
             }
 
-            float newRotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * FreecamPlugin.CameraLookSensitivity.Value;
-            float newRotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * FreecamPlugin.CameraLookSensitivity.Value;
-            transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
+            float newRotationX = transform.eulerAngles.y + Input.GetAxis("Mouse X") * FreecamPlugin.CameraLookSensitivity.Value;
+            float newRotationY = transform.eulerAngles.x - Input.GetAxis("Mouse Y") * FreecamPlugin.CameraLookSensitivity.Value;
+            transform.eulerAngles = new Vector3(newRotationY, newRotationX, 0f);
 
             if (FreecamPlugin.CameraMousewheelZoom.Value)
             {
@@ -79,6 +107,11 @@ namespace Terkoiz.Freecam
                     var zoomSensitivity = fastMode ? FreecamPlugin.CameraFastZoomSpeed.Value : FreecamPlugin.CameraZoomSpeed.Value;
                     transform.position += transform.forward * (axis * zoomSensitivity);
                 }
+            }
+            if (_ownsCamera)
+            {
+                _position = transform.position;
+                _rotation = transform.rotation;
             }
         }
 

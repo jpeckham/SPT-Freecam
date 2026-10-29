@@ -10,7 +10,7 @@ using KeyboardShortcut = BepInEx.Unity.IL2CPP.Configuration.KeyboardShortcut;
 
 namespace Terkoiz.Freecam
 {
-    [BepInPlugin("com.terkoiz.freecam", "Terkoiz.Freecam", "2.0.1")]
+    [BepInPlugin("com.terkoiz.freecam", "Terkoiz.Freecam", "2.0.2")]
     [BepInDependency("com.sptushonka.core", "5.0.0")]
     public class FreecamPlugin : BasePlugin
     {
