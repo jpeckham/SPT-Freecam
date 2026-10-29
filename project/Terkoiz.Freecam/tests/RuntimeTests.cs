@@ -29,7 +29,23 @@ public class RuntimeTests : BasePlugin
             camera.IsActive = false;
             typeof(FreecamController).GetField("_controlsToggled", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(controller, true);
             if (!controller.IsFreecamActive || ForceSetCameraPositionPatch.PatchPrefix()) throw new Exception("Paused free camera reset allowed");
-            Log.LogInfo("PASS: native component creation, pre-raid update guard, normal/free/paused camera reset gating");
+            var nativeCamera = test.AddComponent<EFT.CameraControl.PlayerCameraController>();
+            var cameraField = typeof(FreecamController).GetField("_playerCameraController", BindingFlags.Instance | BindingFlags.NonPublic);
+            var suspend = typeof(FreecamController).GetMethod("SuspendPlayerCamera", BindingFlags.Instance | BindingFlags.NonPublic);
+            var restore = typeof(FreecamController).GetMethod("RestorePlayerCamera", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (cameraField == null || suspend == null || restore == null) throw new Exception("Missing native camera ownership handoff");
+            cameraField.SetValue(controller, nativeCamera);
+            nativeCamera.enabled = true;
+            suspend.Invoke(controller, null);
+            if (nativeCamera.enabled) throw new Exception("Native camera still owns updates while detached");
+            suspend.Invoke(controller, null);
+            restore.Invoke(controller, null);
+            if (!nativeCamera.enabled) throw new Exception("Native camera not restored");
+            nativeCamera.enabled = false;
+            suspend.Invoke(controller, null);
+            restore.Invoke(controller, null);
+            if (nativeCamera.enabled) throw new Exception("Previously disabled camera unexpectedly enabled");
+            Log.LogInfo("PASS: native camera ownership suspend/restore, component creation, pre-raid guard, normal/free/paused reset gating");
         }
         catch (Exception ex) { Log.LogError("FAIL: " + ex); }
         finally

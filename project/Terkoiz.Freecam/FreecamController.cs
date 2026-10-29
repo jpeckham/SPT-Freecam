@@ -13,6 +13,9 @@ namespace Terkoiz.Freecam
         public FreecamController(System.IntPtr pointer) : base(pointer) { }
         private GameObject _mainCamera;
         private Freecam _freeCamScript;
+        private PlayerCameraController _playerCameraController;
+        private bool _cameraSuspended;
+        private bool _cameraWasEnabled;
 
         private EftBattleUIScreen _playerUi;
         private bool _uiHidden;
@@ -30,7 +33,8 @@ namespace Terkoiz.Freecam
             var player = GetLocalPlayerFromWorld();
             if (player == null) return;
             // Get Main Camera
-            _mainCamera = player.GetComponent<PlayerCameraController>()?.Camera?.gameObject;
+            _playerCameraController = player.GetComponent<PlayerCameraController>();
+            _mainCamera = _playerCameraController?.Camera?.gameObject;
             if (_mainCamera == null)
             {
                 FreecamPlugin.Logger.LogError("Failed to locate main camera");
@@ -148,28 +152,11 @@ namespace Terkoiz.Freecam
         /// <param name="localPlayer"></param>
         private void SetPlayerToFreecamMode(Player localPlayer)
         {
-            // We set the player to third person mode, but then we want set the camera to freecam mode
-            // This means our character will be fully visible, while letting the camera move freely
-            // Setting the player point of view directly to Freecam seems to hide the head and arms of the character, which is not desirable
-
+            // Keep the player's body visible while our separate component owns camera movement.
             localPlayer.PointOfView = EPointOfView.ThirdPerson;
-
-            // Generated IL2CPP wrappers expose the native field as a property.
-            var playerBody = localPlayer._playerBody;
-            if (playerBody != null)
-            {
-                // We tell the PlayerBody class that it's in FreeCamera mode, and force an update of the Camera Controller view mode
-                // Setting the PointOfView.Value directly skips all the code that would usually change how the player body is rendered
-                playerBody.PointOfView.Value = EPointOfView.FreeCamera;
-                localPlayer.GetComponent<PlayerCameraController>().UpdatePointOfView();
-
-                // All we really needed to do, was trigger the UpdatePointOfView method and have it update to the FreeCam state
-                // There's no easy way of doing this without patching the method, and even then it might be a bloated solution
-            }
-            else
-            {
-                FreecamPlugin.Logger.LogError("Failed to get the PlayerBody field");
-            }
+            // EFT 48146 still runs the first/third-person camera state for FreeCamera POV.
+            // Suspend all native camera update loops, including their inlined position writes.
+            SuspendPlayerCamera();
 
             // Instead of Detouring, just turn off _gamePlayerOwner which takes the input
             _gamePlayerOwner.enabled = false;
@@ -202,6 +189,22 @@ namespace Terkoiz.Freecam
             _gamePlayerOwner.enabled = true;
 
             localPlayer.PointOfView = EPointOfView.FirstPerson;
+            RestorePlayerCamera();
+        }
+
+        private void SuspendPlayerCamera()
+        {
+            if (_cameraSuspended || _playerCameraController == null) return;
+            _cameraWasEnabled = _playerCameraController.enabled;
+            _playerCameraController.enabled = false;
+            _cameraSuspended = true;
+        }
+
+        private void RestorePlayerCamera()
+        {
+            if (!_cameraSuspended) return;
+            if (_playerCameraController != null) _playerCameraController.enabled = _cameraWasEnabled;
+            _cameraSuspended = false;
         }
 
         /// <summary>
@@ -241,6 +244,7 @@ namespace Terkoiz.Freecam
 
         public void OnDestroy()
         {
+            RestorePlayerCamera();
             if (_gamePlayerOwner != null) _gamePlayerOwner.enabled = true;
             if (_playerUi != null && _uiHidden) _playerUi.gameObject.SetActive(true);
             FreecamPlugin.FreecamControllerInstance = null;

@@ -17,6 +17,14 @@ The port uses BepInEx 6 IL2CPP `BasePlugin`, native component registration and c
 
 ## Controls and validation
 
+### 2.0.1: camera leash correction
+
+James's first gameplay test found that numpad + followed by W repeatedly snapped the camera back. The original 2.0.0 startup harness only tested the reset-patch guard; it did not exercise camera movement. Inspection of the 48146 native camera code showed that `UpdatePointOfView` dispatches to the active first/third-person state, while `LateUpdate` and fixed/update loops continue driving that state. The old body-POV trick did not transfer camera ownership to Freecam, and guarding `CameraManager.ForceSetPosition` alone was insufficient.
+
+Version **2.0.1** keeps the body in third person and suspends `PlayerCameraController` while detached. Freecam's separate component handles movement. Pausing camera controls keeps the native controller suspended; exit/teleport and component teardown restore its prior enabled state. The original native patch remains as an additional guard.
+
+The added in-client regression test failed before this change and passed afterward using a native `PlayerCameraController`: suspend, repeated suspend, restore, and preservation of an already-disabled controller. Build passed with 0 warnings/errors. **The original in-raid leash reproduction still needs a user retest**; this result establishes the ownership handoff, not a completed gameplay validation.
+
 - Numpad **+**: toggle freecam.
 - Numpad **.**: toggle camera/player controls while detached.
 - Numpad **Enter**: teleport to camera and exit freecam.
