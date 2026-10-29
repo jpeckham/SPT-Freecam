@@ -1,136 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <Version>1.4.8</Version>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Terkoiz.Freecam</AssemblyName>
+    <RootNamespace>Terkoiz.Freecam</RootNamespace>
+    <Version>2.0.0</Version>
     <Authors>Terkoiz</Authors>
-    <RepositoryUrl>https://github.com/TerkoizLT/SPT-Freecam</RepositoryUrl>
     <PackageLicenseExpression>NCSA</PackageLicenseExpression>
-  </PropertyGroup>
-  <PropertyGroup>
-    <TarkovDir Condition=" '$(TarkovDir)' == '' ">D:\SPT 4.1 BE\</TarkovDir>
-    <TarkovPluginsSPTDir>$(TarkovDir)BepInEx\plugins\spt\</TarkovPluginsSPTDir>
-    <TarkovManagedDir>$(TarkovDir)EscapeFromTarkov_Data\Managed\</TarkovManagedDir>
-    <TarkovBepInExCoreDir>$(TarkovDir)BepInEx\core\</TarkovBepInExCoreDir>
-    <ZipFile>$(ProjectDir)release\$(ProjectName).7z</ZipFile>
-    <SevenZipExe>"C:\Program Files\7-Zip\7z.exe"</SevenZipExe>
+    <LangVersion>latest</LangVersion>
+    <SPTPath Condition="'$(SPTPath)' == ''">C:\sptarkov\SPTarkov 5.0.0-local</SPTPath>
+    <CorePath>$(SPTPath)/BepInEx/core</CorePath>
+    <InteropPath>$(SPTPath)/BepInEx/interop</InteropPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <Reference Include="BepInEx.Unity.Common"><HintPath>$(CorePath)/BepInEx.Unity.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx.Core"><HintPath>$(CorePath)/BepInEx.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP"><HintPath>$(CorePath)/BepInEx.Unity.IL2CPP.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(CorePath)/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Runtime"><HintPath>$(CorePath)/Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Common"><HintPath>$(CorePath)/Il2CppInterop.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SPTushonka.Reflection"><HintPath>$(SPTPath)/BepInEx/plugins/sptushonka/SPTushonka.Reflection.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="$(InteropPath)/*.dll"><Private>false</Private></Reference>
+    <Compile Remove="tests/**/*.cs" />
+    <EmbeddedResource Remove="tests/**/*" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>$(TarkovBepInExCoreDir)0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Spt.Common">
-      <HintPath>$(TarkovPluginsSPTDir)spt-common.dll</HintPath>
-    </Reference>
-    <Reference Include="Spt.Reflection">
-      <HintPath>$(TarkovPluginsSPTDir)spt-reflection.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(TarkovManagedDir)Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>$(TarkovBepInExCoreDir)BepInEx.dll</HintPath>
-    </Reference>
-    <Reference Include="Comfort">
-      <HintPath>$(TarkovManagedDir)Comfort.dll</HintPath>
-    </Reference>
-    <Reference Include="Comfort.Unity, Version=1.0.0.4, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)Comfort.Unity.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Sirenix.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)Sirenix.Serialization.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(TarkovManagedDir)UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)UnityEngine.AssetBundleModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(TarkovManagedDir)UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)UnityEngine.IMGUIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(TarkovManagedDir)UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)UnityEngine.TextRenderingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(TarkovManagedDir)UnityEngine.UI.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <!-- Post-Build Actions -->
-  <Target Name="PostBuild" AfterTargets="Build">
-    <PropertyGroup>
-      <ReleaseRoot>$(ProjectDir)release\$(ProjectName)\</ReleaseRoot>
-      <ZipFile>$(ProjectDir)release\$(ProjectName).7z</ZipFile>
-      <SevenZipExe>"C:\Program Files\7-Zip\7z.exe"</SevenZipExe>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <OutputDLL Include="$(TargetPath)" />
-    </ItemGroup>
-
-    <!-- Copy to Tarkov Dir -->
-    <Copy SourceFiles="@(OutputDLL);@(License)"
-          DestinationFolder="$(TarkovDir)BepInEx\plugins\$(ProjectName)\" />
-
-    <Copy SourceFiles="@(ServerComponents)"
-          DestinationFolder="$(TarkovDir)SPT_Runtime\user\mods\$(ProjectName)\%(RecursiveDir)" />
-
-    <!-- Clean staging -->
-    <RemoveDir Directories="$(ReleaseRoot)" />
-
-    <!-- Build release folder structure -->
-    <Copy SourceFiles="@(OutputDLL);@(License)"
-          DestinationFolder="$(ReleaseRoot)BepInEx\plugins\$(ProjectName)\" />
-
-    <Copy SourceFiles="@(ServerComponents)"
-          DestinationFolder="$(ReleaseRoot)SPT_Runtime\user\mods\$(ProjectName)\%(RecursiveDir)" />
-
-    <!-- Ensure release dir exists -->
-    <MakeDir Directories="$(ProjectDir)release" />
-
-    <!-- Delete old archive -->
-    <Delete Files="$(ZipFile)" Condition="Exists('$(ZipFile)')" />
-
-    <!-- Create 7z -->
-    <Exec Command='$(SevenZipExe) a -t7z "$(ZipFile)" "$(ReleaseRoot)*" -mx=5 -m0=lzma2' />
+  <Target Name="StagePlugin" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath);$(ProjectDir)../../LICENSE" DestinationFolder="$(ProjectDir)Build/BepInEx/plugins/Freecam" />
   </Target>
 </Project>

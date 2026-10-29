@@ -2,8 +2,7 @@ using Comfort.Common;
 using EFT;
 using EFT.CameraControl;
 using EFT.UI;
-using HarmonyLib;
-using JetBrains.Annotations;
+
 using Terkoiz.Freecam.Patches;
 using UnityEngine;
 
@@ -11,6 +10,7 @@ namespace Terkoiz.Freecam
 {
     public class FreecamController : MonoBehaviour
     {
+        public FreecamController(System.IntPtr pointer) : base(pointer) { }
         private GameObject _mainCamera;
         private Freecam _freeCamScript;
 
@@ -23,13 +23,14 @@ namespace Terkoiz.Freecam
         private Quaternion? _lastRotation;
 
         private bool _controlsToggled;
-        public bool IsFreecamActive => _freeCamScript.IsActive || _controlsToggled;
+        public bool IsFreecamActive => (_freeCamScript != null && _freeCamScript.IsActive) || _controlsToggled;
 
-        [UsedImplicitly]
         public void Start()
         {
+            var player = GetLocalPlayerFromWorld();
+            if (player == null) return;
             // Get Main Camera
-            _mainCamera = GetLocalPlayerFromWorld().GetComponent<PlayerCameraController>().Camera.gameObject;
+            _mainCamera = player.GetComponent<PlayerCameraController>()?.Camera?.gameObject;
             if (_mainCamera == null)
             {
                 FreecamPlugin.Logger.LogError("Failed to locate main camera");
@@ -37,7 +38,7 @@ namespace Terkoiz.Freecam
             }
 
             // Get Player UI
-            _playerUi = Singleton<CommonUI>.Instance.EftBattleUIScreen;
+            _playerUi = Singleton<CommonUI>.Instance?.EftBattleUIScreen;
             if (_playerUi == null)
             {
                 FreecamPlugin.Logger.LogError("Failed to locate player UI");
@@ -58,10 +59,11 @@ namespace Terkoiz.Freecam
                 FreecamPlugin.Logger.LogError("Failed to locate GamePlayerOwner");
             }
         }
-        
-        [UsedImplicitly]
+
         public void Update()
         {
+            if (_mainCamera == null || _freeCamScript == null || _playerUi == null || _gamePlayerOwner == null)
+                return;
             if (FreecamPlugin.ToggleUi.Value.IsDown())
             {
                 ToggleUi();
@@ -93,7 +95,7 @@ namespace Terkoiz.Freecam
             if (localPlayer == null)
                 return;
 
-            if (!_freeCamScript.IsActive)
+            if (!IsFreecamActive)
             {
                 SetPlayerToFreecamMode(localPlayer);
             }
@@ -113,15 +115,15 @@ namespace Terkoiz.Freecam
                 return;
 
             // Move the player to the camera's current position and switch to First Person mode
-            if (_freeCamScript.IsActive)
+            if (IsFreecamActive)
             {
                 // Tell the fall damage patch that we just teleported. Used for the "smart" fall damage prevention feature
                 FallDamagePatch.HasTeleported = true;
 
                 // We grab the camera's position, but we subtract a bit off the Y axis, because the players coordinate origin is at the feet
                 var position = new Vector3(_mainCamera.transform.position.x, _mainCamera.transform.position.y - 1.8f, _mainCamera.transform.position.z);
-                localPlayer.gameObject.transform.SetPositionAndRotation(position, Quaternion.Euler(0, _mainCamera.transform.rotation.y, 0));
-                
+                localPlayer.gameObject.transform.SetPositionAndRotation(position, Quaternion.Euler(0, _mainCamera.transform.eulerAngles.y, 0));
+
                 // localPlayer.gameObject.transform.SetPositionAndRotation(position, _mainCamera.transform.rotation);
                 SetPlayerToFirstPersonMode(localPlayer);
             }
@@ -152,8 +154,8 @@ namespace Terkoiz.Freecam
 
             localPlayer.PointOfView = EPointOfView.ThirdPerson;
 
-            // Get the PlayerBody reference. It's a protected field, so we have to use traverse to fetch it
-            var playerBody = Traverse.Create(localPlayer).Field<PlayerBody>("_playerBody").Value;
+            // Generated IL2CPP wrappers expose the native field as a property.
+            var playerBody = localPlayer._playerBody;
             if (playerBody != null)
             {
                 // We tell the PlayerBody class that it's in FreeCamera mode, and force an update of the Camera Controller view mode
@@ -188,13 +190,14 @@ namespace Terkoiz.Freecam
         private void SetPlayerToFirstPersonMode(Player localPlayer)
         {
             _freeCamScript.IsActive = false;
+            _controlsToggled = false;
 
             if (FreecamPlugin.CameraRememberLastPosition.Value)
             {
                 _lastPosition = _mainCamera.transform.position;
                 _lastRotation = _mainCamera.transform.rotation;
             }
-            
+
             // re-enable _gamePlayerOwner
             _gamePlayerOwner.enabled = true;
 
@@ -206,13 +209,14 @@ namespace Terkoiz.Freecam
         /// </summary>
         private void ToggleCameraControls()
         {
-            if (_freeCamScript.IsActive) 
+            if (!IsFreecamActive) return;
+            if (_freeCamScript.IsActive)
             {
                 _controlsToggled = true;
                 _freeCamScript.IsActive = false;
                 _gamePlayerOwner.enabled = true;
             }
-            else 
+            else
             {
                 _controlsToggled = false;
                 _freeCamScript.IsActive = true;
@@ -235,9 +239,12 @@ namespace Terkoiz.Freecam
             return gameWorld.MainPlayer;
         }
 
-        [UsedImplicitly]
         public void OnDestroy()
         {
+            if (_gamePlayerOwner != null) _gamePlayerOwner.enabled = true;
+            if (_playerUi != null && _uiHidden) _playerUi.gameObject.SetActive(true);
+            FreecamPlugin.FreecamControllerInstance = null;
+            FallDamagePatch.HasTeleported = false;
             // Destroy FreeCamScript before FreeCamController if exists
             Destroy(_freeCamScript);
         }

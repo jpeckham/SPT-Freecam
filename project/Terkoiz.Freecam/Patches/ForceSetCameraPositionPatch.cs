@@ -1,7 +1,7 @@
-﻿using System.Reflection;
+using System.Reflection;
 using EFT.CameraControl;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Terkoiz.Freecam.Patches
 {

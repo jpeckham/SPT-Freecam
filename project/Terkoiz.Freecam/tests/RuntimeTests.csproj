@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Freecam.RuntimeTests</AssemblyName>
+    <RootNamespace>Terkoiz.Freecam</RootNamespace>
+    <Version>2.0.0</Version>
+    <Authors>Terkoiz</Authors>
+    <PackageLicenseExpression>NCSA</PackageLicenseExpression>
+    <LangVersion>latest</LangVersion>
+    <SPTPath Condition="'$(SPTPath)' == ''">C:\sptarkov\SPTarkov 5.0.0-local</SPTPath>
+    <CorePath>$(SPTPath)/BepInEx/core</CorePath>
+    <InteropPath>$(SPTPath)/BepInEx/interop</InteropPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BepInEx.Unity.Common"><HintPath>$(CorePath)/BepInEx.Unity.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx.Core"><HintPath>$(CorePath)/BepInEx.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP"><HintPath>$(CorePath)/BepInEx.Unity.IL2CPP.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(CorePath)/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Runtime"><HintPath>$(CorePath)/Il2CppInterop.Runtime.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Il2CppInterop.Common"><HintPath>$(CorePath)/Il2CppInterop.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SPTushonka.Reflection"><HintPath>$(SPTPath)/BepInEx/plugins/sptushonka/SPTushonka.Reflection.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="$(InteropPath)/*.dll"><Private>false</Private></Reference>
+    <ProjectReference Include="../Terkoiz.Freecam.csproj" />
+    <EmbeddedResource Remove="tests/**/*" />
+  </ItemGroup>
+</Project>

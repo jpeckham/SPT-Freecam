@@ -1,5 +1,5 @@
 using System.Reflection;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using Comfort.Common;
 using EFT;
 using HarmonyLib;
@@ -21,8 +21,9 @@ namespace Terkoiz.Freecam.Patches
             if (gameWorld == null)
                 return;
 
+            FallDamagePatch.HasTeleported = false;
             // Add FreecamController to GameWorld GameObject
-            FreecamPlugin.FreecamControllerInstance = gameWorld.gameObject.AddComponent<FreecamController>();
+            FreecamPlugin.FreecamControllerInstance = gameWorld.gameObject.GetComponent<FreecamController>() ?? gameWorld.gameObject.AddComponent<FreecamController>();
         }
     }
 }

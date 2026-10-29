@@ -1,17 +1,20 @@
-﻿using BepInEx;
+using BepInEx.Unity.IL2CPP;
+using Il2CppInterop.Runtime.Injection;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using JetBrains.Annotations;
+
 using Terkoiz.Freecam.Patches;
 using UnityEngine;
-using KeyboardShortcut = BepInEx.Configuration.KeyboardShortcut;
+using KeyboardShortcut = BepInEx.Unity.IL2CPP.Configuration.KeyboardShortcut;
 
 namespace Terkoiz.Freecam
 {
-    [BepInPlugin("com.terkoiz.freecam", "Terkoiz.Freecam", "1.4.8")]
-    public class FreecamPlugin : BaseUnityPlugin
+    [BepInPlugin("com.terkoiz.freecam", "Terkoiz.Freecam", "2.0.0")]
+    [BepInDependency("com.sptushonka.core", "5.0.0")]
+    public class FreecamPlugin : BasePlugin
     {
-        internal new static ManualLogSource Logger { get; private set; }
+        internal static ManualLogSource Logger { get; private set; }
 
         // Fall damage config entries
         private const string FallDamageSectionName = "Fall Damage";
@@ -41,10 +44,11 @@ namespace Terkoiz.Freecam
 
         public static FreecamController FreecamControllerInstance;
 
-        [UsedImplicitly]
-        internal void Start()
+        public override void Load()
         {
-            Logger = base.Logger;
+            Logger = Log;
+            ClassInjector.RegisterTypeInIl2Cpp<Freecam>();
+            ClassInjector.RegisterTypeInIl2Cpp<FreecamController>();
             InitConfiguration();
 
             new FreecamPatch().Enable();
@@ -129,12 +133,12 @@ namespace Terkoiz.Freecam
                 new ConfigDescription(
                     "Amount to zoom the camera when using the mouse wheel while holding Shift",
                     new AcceptableValueRange<float>(0.01f, 1000f)));
-            
+
             CameraHeightMovement = Config.Bind(
                 TogglesSectionName,
                 "Camera Height Movement Keys",
                 true,
-                "Enables or disables the camera height movement keys, which default to Q, E, R, F." + 
+                "Enables or disables the camera height movement keys, which default to Q, E, R, F." +
                 " \nUseful to disable if you want to let your character lean in Freecam mode");
 
             CameraMousewheelZoom = Config.Bind(

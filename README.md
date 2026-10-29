@@ -1,4 +1,37 @@
-# Freecam
+# Freecam — local SPT 5.0 / EFT 48146 port
+
+Branch `spt-5.0-48146` in [James's fork](https://github.com/jpeckham/SPT-Freecam/tree/spt-5.0-48146) ports acidphantasm's upstream commit `fa45a86d48aa6b9311f9a255b03a82a84be291ba`. No existing 5.0 port was found in the upstream branch/PR list or the other listed fork. Version **2.0.0** identifies this experimental port; it is not an upstream release.
+
+## Build and install this branch
+
+Requires .NET 10 SDK and a working SPT 5.0 / EFT 1.2.5.0.48146 installation with generated IL2CPP interop assemblies. From this repository's root:
+
+```powershell
+dotnet build project/Terkoiz.Freecam/Terkoiz.Freecam.csproj -c Release `
+  '-p:SPTPath=C:\sptarkov\SPTarkov 5.0.0-local'
+```
+
+Close the client/server, back up any previous plugin/config, and copy the contents of `project/Terkoiz.Freecam/Build/BepInEx/plugins/Freecam` into the installation's `BepInEx/plugins/Freecam`. Include `LICENSE`; remove duplicate older Freecam DLLs elsewhere. Builds stage locally and do not automatically install. No game/reference assemblies are distributed. To uninstall, close the game and remove `Terkoiz.Freecam.dll` from that folder.
+
+The port uses BepInEx 6 IL2CPP `BasePlugin`, native component registration and constructors, the IL2CPP KeyboardShortcut type, and the SPTushonka patch namespace. It accesses the native player-body/health-controller properties directly instead of managed field reflection/injection. The fall prefix returns zero when suppressing the native float-returning method and targets only the local player. Additional fixes guard incomplete initialization, preserve detached-camera state when controls are paused, reset raid state, restore input/UI on component teardown, and use Euler yaw for teleport rotation instead of a quaternion component. Original license and author credit are retained.
+
+## Controls and validation
+
+- Numpad **+**: toggle freecam.
+- Numpad **.**: toggle camera/player controls while detached.
+- Numpad **Enter**: teleport to camera and exit freecam.
+- Numpad **\***: toggle UI.
+- WASD/arrows: move; Shift: faster; Q/E and R/F (or Page Up/Down): height; mouse: look; wheel: move forward/back.
+
+F12 exposes settings in `com.terkoiz.freecam.cfg`. Defaults retain smart fall prevention on, global fall-damage suppression off, and remembered camera position off.
+
+Build: **0 warnings, 0 errors**. Client startup registered both native components and enabled `FreecamPatch`, `FallDamagePatch`, and `ForceSetCameraPositionPatch`. A temporary in-client harness passed native component creation, the pre-raid update guard, and normal/free/paused camera-reset gating. The harness was removed after testing. Final formatting/license-staging cleanup was rebuilt after that smoke test without behavioral changes.
+
+To repeat the harness, build `project/Terkoiz.Freecam/tests/RuntimeTests.csproj` with the same SPTPath, temporarily install its `Freecam.RuntimeTests.dll` alongside the production plugin, and launch a disposable test profile. Check `BepInEx/LogOutput.log` for `Freecam Runtime Tests` and `PASS:`; close the game and remove the test DLL afterward. This is an in-client harness, not a `dotnet test` project.
+
+**Still unverified in a raid:** camera attachment/movement, paused-control transitions, teleport placement, fall prevention, UI hiding, and cleanup between raids. Use a test profile for those checks. Startup and helper checks alone do not establish gameplay compatibility; upstream's distant-LOD limitation may remain.
+
+## Original upstream documentation (historical Mono build instructions)
 
 A BepInEx plugin for SPT-AKI that allows you to detach the camera and fly around freely in Escape From Tarkov.
 

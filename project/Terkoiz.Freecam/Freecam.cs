@@ -1,27 +1,26 @@
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Terkoiz.Freecam
 {
     /// <summary>
     /// A simple free camera to be added to a Unity game object.
-    /// 
+    ///
     /// Full credit to Ashley Davis on GitHub for the initial code:
     /// https://gist.github.com/ashleydavis/f025c03a9221bc840a2b
-    /// 
+    ///
     /// </summary>
     public class Freecam : MonoBehaviour
     {
+        public Freecam(System.IntPtr pointer) : base(pointer) { }
         public bool IsActive = false;
-        
-        [UsedImplicitly]
+
         public void Update()
         {
             if (!IsActive)
             {
                 return;
             }
-            
+
             var fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             var movementSpeed = fastMode ? FreecamPlugin.CameraFastMoveSpeed.Value : FreecamPlugin.CameraMoveSpeed.Value;
 
@@ -83,10 +82,5 @@ namespace Terkoiz.Freecam
             }
         }
 
-        [UsedImplicitly]
-        private void OnDestroy()
-        {
-            Destroy(this);
-        }
     }
 }
