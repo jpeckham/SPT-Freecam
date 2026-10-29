@@ -7,7 +7,7 @@
     <Authors>Terkoiz</Authors>
     <PackageLicenseExpression>NCSA</PackageLicenseExpression>
     <LangVersion>latest</LangVersion>
-    <SPTPath Condition="'$(SPTPath)' == ''">C:\sptarkov\SPTarkov 5.0.0-BE-1.2.5.0.48146</SPTPath>
+    <SPTPath Condition="'$(SPTPath)' == ''">D:\sptarkov\SPTarkov 5.0.0-BE-1.3.0.0.48484</SPTPath>
     <CorePath>$(SPTPath)/BepInEx/core</CorePath>
     <InteropPath>$(SPTPath)/BepInEx/interop</InteropPath>
   </PropertyGroup>

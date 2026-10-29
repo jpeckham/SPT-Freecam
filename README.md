@@ -1,3 +1,13 @@
+> Current local branch: EFT **1.3.0.0.48484**, SPT 5.0, `spt-5.0-eft-1.3.0.0.48484`. The 48146 branch and installation remain preserved.
+
+## October 29, 2026: 48484 rebuild
+
+Build projects now default to `D:\sptarkov\SPTarkov 5.0.0-BE-1.3.0.0.48484`. Use .NET 10 and generated references from that installation; existing build commands below accept `-p:SPTPath` to override the target. Build with `-c Release -p:SkipDeploy=true`, then install the staged plugin directory. Do not use old 48146 references for this branch.
+
+No gameplay logic changed for this rebuild. Existing local fixes and mod versions are retained. Installation and validation evidence are recorded in the parent SPT-BE README, section N8.
+
+## Historical 48146 port notes
+
 > Locked baseline: EFT **1.2.5.0.48146**, SPT 5.0. Newer EFT work must use a separate branch and installation. The original `spt-5.0-48146` branch remains available as historical provenance.
 
 # Freecam â€” local SPT 5.0 / EFT 48146 port
