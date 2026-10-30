@@ -2,7 +2,7 @@
 
 ## October 29, 2026: 48484 rebuild
 
-Build projects now default to `D:\sptarkov\SPTarkov 5.0.0-BE-1.3.0.0.48484`. Use .NET 10 and generated references from that installation; existing build commands below accept `-p:SPTPath` to override the target. Build with `-c Release -p:SkipDeploy=true`, then install the staged plugin directory. Do not use old 48146 references for this branch.
+Build projects now default to `C:\sptarkov\SPTarkov 5.0.0-BE-1.3.0.0.48484`. Use .NET 10 and generated references from that installation; existing build commands below accept `-p:SPTPath` to override the target. Build with `-c Release -p:SkipDeploy=true`, then install the staged plugin directory. Do not use old 48146 references for this branch.
 
 No gameplay logic changed for this rebuild. Existing local fixes and mod versions are retained. Installation and validation evidence are recorded in the parent SPT-BE README, section N8.
 
